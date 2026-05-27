@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 // ─────────────────────────────────────────────
 //  CONFIGURATION
 // ─────────────────────────────────────────────
-const BOT_TOKEN    = process.env.BOT_TOKEN    || "8973544187:AAGHFErG15Stbmnq5dukfdMuSYu9NMtOXBo";
+const BOT_TOKEN    = process.env.BOT_TOKEN    || "8820876470:AAF5EOl-gtjDTqQY02smLr7qh4KPB8kP_r0";
 const MONGO_URI    = process.env.MONGO_URI    || 'mongodb+srv://akhmad12321312313:3kINAcgdXW0YdPj5@ahmad.y82yqis.mongodb.net/';
 const ADMIN_ID     = process.env.ADMIN_ID ? parseInt(process.env.ADMIN_ID, 10) : 7553920926;
 const EXNESS_LINK  = process.env.EXNESS_REF_LINK || 'https://one.exnessonelink.com/a/3a6rcif6lv';
