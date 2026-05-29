@@ -7,6 +7,6 @@
     "telegraf": "^4.16.3"
   },
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "node index.js"
   }
 }
