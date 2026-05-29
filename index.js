@@ -7,11 +7,12 @@ const mongoose = require('mongoose');
 // ─────────────────────────────────────────────
 //  CONFIGURATION
 // ─────────────────────────────────────────────
-const BOT_TOKEN    = process.env.BOT_TOKEN    || "8820876470:AAF5EOl-gtjDTqQY02smLr7qh4KPB8kP_r0";
+const BOT_TOKEN    = process.env.BOT_TOKEN    || "8973544187:AAGHFErG15Stbmnq5dukfdMuSYu9NMtOXBo";
 const MONGO_URI    = process.env.MONGO_URI    || 'mongodb+srv://akhmad12321312313:3kINAcgdXW0YdPj5@ahmad.y82yqis.mongodb.net/';
 const ADMIN_ID     = process.env.ADMIN_ID ? parseInt(process.env.ADMIN_ID, 10) : 7553920926;
 const EXNESS_LINK  = process.env.EXNESS_REF_LINK || 'https://one.exnessonelink.com/a/3a6rcif6lv';
 const CHANNEL_LINK = process.env.CHANNEL_LINK || 'https://t.me/axmadostrade';
+const ADMIN_USERNAME = '@AXMV12';
 
 if (!BOT_TOKEN) { console.error('❌  BOT_TOKEN is missing in .env'); process.exit(1); }
 
@@ -22,6 +23,37 @@ function escMD(text) {
   if (text === null || text === undefined) return '';
   return String(text).replace(/[_*[\]()~`>#+\-=|{}.!\\]/g, '\\$&');
 }
+
+// ─────────────────────────────────────────────
+//  COURSES (Darsliklar / Курсы)
+//  PDF массивини bo'sh qoldirishingiz mumkin, keyin to'ldirish uchun
+// ─────────────────────────────────────────────
+const COURSES = [
+  {
+    id: 'hcs',
+    uz_title: "HCS qanday paydo bo'ladi",
+    ru_title: "Как возникает HCS",
+    en_title: "How HCS occurs",
+    uz_desc: "Bozorda HCS (Higher Candle Wick Structure) qanday hosil bo'lishini tushuntiruvchi kurs.",
+    ru_desc: "Курс объясняющий как формируется ГКС (Графическая Конструкция Свечи) на рынке.",
+    en_desc: "Course explaining how HCS (Higher Candle Wick Structure) forms on the market.",
+    price: 100,
+    emoji: "📊",
+    pdf: ["https://www.dropbox.com/scl/fi/2uqd8fteqvdp7jgeamx3l/HCS-ffffffffffffff-1.pptx?rlkey=kr0jhfa15wf5ly5l8rj6ewp70&st=0dj17wnq&dl=0"], // PDF file_id larini shu yerga qo'shing
+  },
+  {
+    id: '2x negation',
+    uz_title: "2x negation strategiyasi",
+    ru_title: "2x negation стратегия",
+    en_title: "2x negation strategy",
+    uz_desc: "2x negation strategiyasi - bozordagi narx harakatining ikki marta inkor etilishi asosida savdo qilish usuli.",
+    ru_desc: "2x negation стратегия - метод торговли, основанный на двойном отрицании движения цены на рынке.",
+    en_desc: "2x negation strategy - a trading method based on the double negation of price movement in the market.",
+    price: 150,
+    emoji: "💧",
+    pdf: ["https://www.dropbox.com/scl/fi/ex2hsdxz4y5ybgdhd3fiz/2x-negation.pptx?rlkey=detfar39at0vni6dwlo4xwys0&st=q7bdoimj&dl=0"],
+  }
+];
 
 // ─────────────────────────────────────────────
 //  100 ICT TRADING QUIZ QUESTIONS
@@ -91,6 +123,8 @@ const LOCALES = {
       '└ Возможность покупать контент за XP',
     ].join('\n'),
     btn_start_reg: '🚀 Начать регистрацию',
+    btn_admin_contact: '👑 Админ',
+    btn_select_lang: '🌐 Выбрать язык',
     ask_name: '👤 Введите ваше полное имя:',
     ask_phone: '📱 Поделитесь вашим номером телефона:',
     btn_share_phone: '📲 Поделиться номером',
@@ -137,12 +171,12 @@ const LOCALES = {
     rejected_steps: '📋 *Что нужно сделать для вступления:*\n\n1️⃣ Зарегистрируйтесь в *Exness* по нашей реферальной ссылке\n2️⃣ Сделайте чёткий скриншот личного кабинета \\(имя аккаунта должно быть видно\\)\n3️⃣ Отправьте скриншот боту для повторной проверки',
     main_menu: '🚀 *TradePro Community*\n\n💎 Профессиональное трейдинг\\-сообщество нового уровня\\.\n\n📈 *Что есть в канале:*\n├ 500–1000 pips сигналов в день\n├ Бесплатные уроки по трейдингу\n├ Live Trade — торгуем вместе в прямом эфире\n├ Ежедневная аналитика рынка\n├ Детальный разбор каждой сделки\n├ XP\\-система — зарабатывай очки за активность\n├ Покупай эксклюзивный контент за XP',
     btn_rules: '📖 Правила',
-    btn_lessons: '📚 Уроки',
-    btn_signals: '📈 Сигналы',
-    btn_support: '🛠 Поддержка',
+    btn_lessons: '📚 Курсы',
+    btn_signals: '✅ 500-2000pips signal 🚀',
+    btn_support: '👨‍💻 Поддержка',
     btn_profile: '👤 Профиль',
     btn_channel: '📺 Канал',
-    btn_quiz: '🧠 Опрос Trading',
+    btn_quiz: '✅ IQ тест балл 🧠 ',
     profile_title: '👤 Ваш профиль',
     profile_text: (u, date) => [
       '',
@@ -169,15 +203,19 @@ const LOCALES = {
     support_sent: '✅ Ваше сообщение отправлено администратору.',
     support_cancel: 'Отменено.',
     btn_cancel: '❌ Отмена',
-    lessons_title: '📚 Уроки',
-    lesson_locked: '🔒 Урок заблокирован',
+    lessons_title: '📚 Курсы',
+    lesson_locked: '🔒 Курс заблокирован',
     lesson_buy: xp => `🛒 Купить за ${xp} XP`,
     not_enough_xp: '❌ Недостаточно XP.',
-    lesson_bought: '✅ Урок разблокирован!',
+    lesson_bought: '✅ Курс разблокирован!',
+    course_locked_msg: (price, xp) => `🔒 *Курс заблокирован*\n\nЦена: *${price} XP*\nВаш баланс: *${xp} XP*\n\n_Зарабатывайте XP через квизы и активность\\!_`,
     signals_title: '📈 Последние сигналы',
     no_signals: 'Сигналов пока нет.',
     need_verification: '⚠️ Пожалуйста, сначала пройдите верификацию Exness.',
+    register_prompt_title: '🚀 Пройдите регистрацию',
+    register_prompt_text: 'Чтобы получить доступ ко всем разделам, зарегистрируйтесь в Exness по кнопке ниже и отправьте подтверждение.',
     already_registered: '✅ Вы уже зарегистрированы. Используйте меню.',
+    admin_contact: `👑 *Администратор*\n\nЕсли у вас есть вопросы или проблемы, свяжитесь с администратором:\n\n📩 ${ADMIN_USERNAME}\n\n_Нажмите на username чтобы написать\\._`,
     quiz_welcome: (total, done, xp) =>
       `🧠 *ICT Quiz — Тест по трейдингу*\n\n📊 Вопросов всего: ${total}\n✅ Пройдено: ${done}\n⭐ XP заработано: ${xp}\n\n_Правильный ответ \\= XP очки_\n_Начнём?_`,
     quiz_already_done: '✅ Вы уже ответили на этот вопрос!',
@@ -193,6 +231,7 @@ const LOCALES = {
     btn_continue_quiz: '▶️ Продолжить',
     btn_restart_quiz: '🔄 Пройти заново',
     quiz_category: (cat, num) => `📌 Категория: ${cat} | Вопрос #${num}`,
+    no_pdf: '📄 PDF файл пока не добавлен для этого курса.',
   },
 
   en: {
@@ -211,6 +250,8 @@ const LOCALES = {
       '└ Buy exclusive content with XP',
     ].join('\n'),
     btn_start_reg: '🚀 Start Registration',
+    btn_admin_contact: '👑 Admin',
+    btn_select_lang: '🌐 Select Language',
     ask_name: '👤 Enter your full name:',
     ask_phone: '📱 Share your phone number:',
     btn_share_phone: '📲 Share Number',
@@ -255,14 +296,16 @@ const LOCALES = {
     approved_channel: (link) => `📢 *Join our channel:*\n${escMD(link)}\n\n📜 *Channel Rules:*\n\n1️⃣ Respect other members\n2️⃣ No spam\n3️⃣ Follow signals responsibly\n4️⃣ Questions — via bot support`,
     rejected: '❌ *Confirmation rejected\\.*\n\nPlease make sure the screenshot is clear and shows your account name\\.',
     rejected_steps: '📋 *Steps to join:*\n\n1️⃣ Register on *Exness* via our referral link\n2️⃣ Take a clear screenshot of your account \\(account name must be visible\\)\n3️⃣ Send the screenshot to the bot for re\\-verification',
+    register_prompt_title: '🚀 Please register first',
+    register_prompt_text: 'To access all sections, register on Exness via the button below and send your verification screenshot.',
     main_menu: '🚀 *TradePro Community*\n\n💎 Professional next\\-level trading community\\.\n\n📈 *What\'s in the channel:*\n├ 500–1000 pips signals daily\n├ Free trading lessons\n├ Live Trade sessions\n├ Daily market analysis\n├ Detailed trade breakdown\n├ XP system — earn points for activity\n├ Buy exclusive content with XP',
     btn_rules: '📖 Rules',
-    btn_lessons: '📚 Lessons',
-    btn_signals: '📈 Signals',
-    btn_support: '🛠 Support',
+    btn_lessons: '📚 Courses',
+    btn_signals: '✅ 500-2000pips signal 🚀',
+    btn_support: '👨‍💻 Support',
     btn_profile: '👤 Profile',
     btn_channel: '📺 Channel',
-    btn_quiz: '🧠 trading Quiz',
+    btn_quiz: '✅ IQ test ball 🧠',
     profile_title: '👤 Your Profile',
     profile_text: (u, date) => [
       '',
@@ -284,15 +327,17 @@ const LOCALES = {
     support_sent: '✅ Your message has been sent to the admin.',
     support_cancel: 'Cancelled.',
     btn_cancel: '❌ Cancel',
-    lessons_title: '📚 Lessons',
-    lesson_locked: '🔒 Lesson locked',
+    lessons_title: '📚 Courses',
+    lesson_locked: '🔒 Course locked',
     lesson_buy: xp => `🛒 Buy for ${xp} XP`,
     not_enough_xp: '❌ Not enough XP.',
-    lesson_bought: '✅ Lesson unlocked!',
+    lesson_bought: '✅ Course unlocked!',
+    course_locked_msg: (price, xp) => `🔒 *Course Locked*\n\nPrice: *${price} XP*\nYour balance: *${xp} XP*\n\n_Earn XP through quizzes and activity\\!_`,
     signals_title: '📈 Latest Signals',
     no_signals: 'No signals yet.',
     need_verification: '⚠️ Please complete Exness verification first.',
     already_registered: '✅ You are already registered. Use the menu.',
+    admin_contact: `👑 *Administrator*\n\nIf you have questions or issues, contact the admin:\n\n📩 ${ADMIN_USERNAME}\n\n_Click the username to message\\._`,
     quiz_welcome: (total, done, xp) =>
       `🧠 *ICT Quiz*\n\n📊 Total questions: ${total}\n✅ Completed: ${done}\n⭐ XP earned: ${xp}\n\n_Correct answer \\= XP points_\n_Ready to start?_`,
     quiz_already_done: '✅ Already answered!',
@@ -308,6 +353,7 @@ const LOCALES = {
     btn_continue_quiz: '▶️ Continue',
     btn_restart_quiz: '🔄 Restart',
     quiz_category: (cat, num) => `📌 Category: ${cat} | Q#${num}`,
+    no_pdf: '📄 PDF file not yet added for this course.',
   },
 
   uz: {
@@ -325,17 +371,19 @@ const LOCALES = {
       '├ Noyob XP mukofot tizimi',
       '└ XP ga eksklyuziv kontent sotib olish',
     ].join('\n'),
-    btn_start_reg: '🚀 Ro\'yxatdan o\'tish',
-    ask_name: '👤 To\'liq ismingizni kiriting:',
+    btn_start_reg: "🚀 Ro'yxatdan o'tish",
+    btn_admin_contact: '👑 Admin',
+    btn_select_lang: '🌐 Tilni tanlash',
+    ask_name: "👤 To'liq ismingizni kiriting:",
     ask_phone: '📱 Telefon raqamingizni ulashing:',
     btn_share_phone: '📲 Raqamni ulashish',
-    reg_success: '✅ Ro\'yxatdan o\'tish muvaffaqiyatli\\!',
+    reg_success: "✅ Ro'yxatdan o'tish muvaffaqiyatli\\!",
     rules_title: '📜 *Kirish qoidalari*',
     rules_text: [
       '',
-      '1️⃣ *Exness* referal havolasi orqali ro\'yxatdan o\'ting',
-      '2️⃣ Ro\'yxatdan o\'tgandan so\'ng tasdiqlash rasmini yuboring',
-      '3️⃣ Admin tekshiruvidan so\'ng to\'liq kirish imkoniyati beriladi',
+      "1️⃣ *Exness* referal havolasi orqali ro'yxatdan o'ting",
+      "2️⃣ Ro'yxatdan o'tgandan so'ng tasdiqlash rasmini yuboring",
+      "3️⃣ Admin tekshiruvidan so'ng to'liq kirish imkoniyati beriladi",
     ].join('\n'),
     benefits_title: '🌟 *Kanalda nima bor*',
     benefits_text: [
@@ -348,67 +396,72 @@ const LOCALES = {
       '🏆 XP tizimi — faollik uchun ball to\'plang',
       '🛒 XP ga eksklyuziv kontent sotib oling',
     ].join('\n'),
-    exness_prompt: ['🔗 *1\\-qadam: Exness\'da ro\'yxatdan o\'ting*', '', 'Referal havolani bosing va ro\'yxatdan o\'ting:'].join('\n'),
-    btn_register_exness: '🔗 Exness\'da ro\'yxatdan o\'tish',
-    exness_photo_prompt: ['📸 *2\\-qadam: Ro\'yxatdan o\'tishni tasdiqlash*', '', 'Exness shaxsiy kabinetingizning skrinshotini', 'hisob nomi ko\'rinadigan holda yuboring\\.'].join('\n'),
-    photo_received: ['✅ *Rasm qabul qilindi\\!*', '', '⏳ Admin tekshiruvi kutilmoqda\\.', 'Odatda 24 soatgacha vaqt ketadi\\.'].join('\n'),
-    approved: '🎉 *Tabriklaymiz\\! Ro\'yxat tasdiqlandi\\.*\n\n✅ *TradePro Community*ga xush kelibsiz\\!\nEndi sizda to\'liq kirish imkoni bor\\.',
-    approved_channel: (link) => `📢 *Kanalimizga qo\'shiling:*\n${escMD(link)}\n\n📜 *Kanal qoidalari:*\n\n1️⃣ Boshqa a\'zolarga hurmat bilan muomala qiling\n2️⃣ Spam qilmang\n3️⃣ Signallarga mas\'uliyat bilan amal qiling\n4️⃣ Savollar — bot orqali`,
-    rejected: '❌ *Tasdiq rad etildi\\.*\n\nSkrinshot aniq ekanligiga va hisob nomi ko\'rinishiga ishonch hosil qiling\\.',
-    rejected_steps: '📋 *Qo\'shilish uchun nima qilish kerak:*\n\n1️⃣ Bizning referal havola orqali *Exness*da ro\'yxatdan o\'ting\n2️⃣ Shaxsiy kabinet skrinshotini oling \\(hisob nomi ko\'rinishi shart\\)\n3️⃣ Qayta tekshirish uchun skrinshotni botga yuboring',
-    main_menu: '🚀 *TradePro Community*\n\n💎 Yangi darajadagi professional treyding hamjamiyati\\.\n\n📈 *Kanalda nima bor:*\n├ Kuniga 500–1000 pips signal\n├ Bepul treyding darslari\n├ Live Trade — birga jonli savdo\n├ Kunlik bozor tahlili\n├ Har bir bitimni batafsil ko\'rib chiqish\n├ XP tizimi — faollik uchun ball to\'plang\n├ XP ga eksklyuziv kontent sotib oling',
+    exness_prompt: ["🔗 *1\\-qadam: Exness'da ro'yxatdan o'ting*", '', "Referal havolani bosing va ro'yxatdan o'ting:"].join('\n'),
+    btn_register_exness: "🔗 Exness'da ro'yxatdan o'tish",
+    exness_photo_prompt: ["📸 *2\\-qadam: Ro'yxatdan o'tishni tasdiqlash*", '', "Exness shaxsiy kabinetingizning skrinshotini", "hisob nomi ko'rinadigan holda yuboring\\."].join('\n'),
+    photo_received: ["✅ *Rasm qabul qilindi\\!*", '', "⏳ Admin tekshiruvi kutilmoqda\\.", "Odatda 24 soatgacha vaqt ketadi\\."].join('\n'),
+    approved: "🎉 *Tabriklaymiz\\! Ro'yxat tasdiqlandi\\.*\n\n✅ *TradePro Community*ga xush kelibsiz\\!\nEndi sizda to'liq kirish imkoni bor\\.",
+    approved_channel: (link) => `📢 *Kanalimizga qo'shiling:*\n${escMD(link)}\n\n📜 *Kanal qoidalari:*\n\n1️⃣ Boshqa a'zolarga hurmat bilan muomala qiling\n2️⃣ Spam qilmang\n3️⃣ Signallarga mas'uliyat bilan amal qiling\n4️⃣ Savollar — bot orqali`,
+    rejected: "❌ *Tasdiq rad etildi\\.*\n\nSkrinshot aniq ekanligiga va hisob nomi ko'rinishiga ishonch hosil qiling\\.",
+    rejected_steps: "📋 *Qo'shilish uchun nima qilish kerak:*\n\n1️⃣ Bizning referal havola orqali *Exness*da ro'yxatdan o'ting\n2️⃣ Shaxsiy kabinet skrinshotini oling \\(hisob nomi ko'rinishi shart\\)\n3️⃣ Qayta tekshirish uchun skrinshotni botga yuboring",
+    main_menu: "🚀 *TradePro Community*\n\n💎 Yangi darajadagi professional treyding hamjamiyati\\.\n\n📈 *Kanalda nima bor:*\n├ Kuniga 500–1000 pips signal\n├ Bepul treyding darslari\n├ Live Trade — birga jonli savdo\n├ Kunlik bozor tahlili\n├ Har bir bitimni batafsil ko'rib chiqish\n├ XP tizimi — faollik uchun ball to'plang\n├ XP ga eksklyuziv kontent sotib oling",
     btn_rules: '📖 Qoidalar',
-    btn_lessons: '📚 Darsliklar',
-    btn_signals: '📈 Signallar',
-    btn_support: '🛠 Yordam',
+    btn_lessons: '📚 Kurslar',
+    btn_signals: '✅ 500-2000pips signal 🚀',
+    btn_support: '👨‍💻 Yordam',
     btn_profile: '👤 Profil',
     btn_channel: '📺 Kanal',
-    btn_quiz: '🧠 trading Test',
+    btn_quiz: ' ✅ IQ test ball 🧠',
     profile_title: '👤 Sizning profilingiz',
     profile_text: (u, date) => [
       '',
       `👤 Ism: ${u.fullname}`,
-      `🔖 Username: @${u.username || 'yo\'q'}`,
+      `🔖 Username: @${u.username || "yo'q"}`,
       `📱 Telefon: ${u.phone || '—'}`,
       `⭐ XP: ${u.xp}`,
       `🔑 Rol: ${u.role === 'admin' ? '👑 Admin' : '👤 Foydalanuvchi'}`,
       `✅ Exness: ${u.exness_verified ? 'Tasdiqlangan' : '⏳ Kutilmoqda'}`,
-      `🌐 Til: ${u.language === 'ru' ? '🇷🇺 Ruscha' : u.language === 'en' ? '🇺🇸 Inglizcha' : '🇺🇿 O\'zbekcha'}`,
-      `📅 Ro\'yxat sanasi: ${date}`,
+      `🌐 Til: ${u.language === 'ru' ? '🇷🇺 Ruscha' : u.language === 'en' ? '🇺🇸 Inglizcha' : "🇺🇿 O'zbekcha"}`,
+      `📅 Ro'yxat sanasi: ${date}`,
     ].join('\n'),
-    btn_change_lang: '🌐 Tilni o\'zgartirish',
+    btn_change_lang: "🌐 Tilni o'zgartirish",
     btn_refresh: '🔄 Yangilash',
     btn_back: '⬅️ Orqaga',
+    register_prompt_title: "🚀 Avval ro'yxatdan o'ting",
+    register_prompt_text: "Barcha bo'limlarga kirish uchun quyidagi tugma orqali Exnessda ro'yxatdan o'ting va tasdiqlash skrinshotini yuboring.",
     lang_select: '🌐 Tilni tanlang:',
-    lang_changed: '✅ Til o\'zgartirildi!',
-    support_ask: ['🛠 Yordam markazi', '', 'Savolingiz yoki muammoingizni yozing.', 'Admin tez orada javob beradi.'].join('\n'),
+    lang_changed: "✅ Til o'zgartirildi!",
+    support_ask: ["🛠 Yordam markazi", '', "Savolingiz yoki muammoingizni yozing.", "Admin tez orada javob beradi."].join('\n'),
     support_sent: '✅ Xabaringiz adminga yuborildi.',
     support_cancel: 'Bekor qilindi.',
     btn_cancel: '❌ Bekor qilish',
-    lessons_title: '📚 Darsliklar',
-    lesson_locked: '🔒 Dars qulflangan',
+    lessons_title: '📚 Kurslar',
+    lesson_locked: '🔒 Kurs qulflangan',
     lesson_buy: xp => `🛒 ${xp} XP ga sotib olish`,
-    not_enough_xp: '❌ Yetarli XP yo\'q.',
-    lesson_bought: '✅ Dars ochildi!',
-    signals_title: '📈 So\'nggi signallar',
-    no_signals: 'Hali signal yo\'q.',
-    need_verification: '⚠️ Avval Exness verifikatsiyasidan o\'ting.',
-    already_registered: '✅ Siz allaqachon ro\'yxatdan o\'tgansiz. Menyudan foydalaning.',
+    not_enough_xp: "❌ Yetarli XP yo'q.",
+    lesson_bought: '✅ Kurs ochildi!',
+    course_locked_msg: (price, xp) => `🔒 *Kurs qulflangan*\n\nNarxi: *${price} XP*\nSizning balansiz: *${xp} XP*\n\n_XP to'plash uchun testlarni bajaring\\!_`,
+    signals_title: "📈 So'nggi signallar",
+    no_signals: "Hali signal yo'q.",
+    need_verification: "⚠️ Avval Exness verifikatsiyasidan o'ting.",
+    already_registered: "✅ Siz allaqachon ro'yxatdan o'tgansiz. Menyudan foydalaning.",
+    admin_contact: `👑 *Administrator*\n\nSavollaringiz bo'lsa admin bilan bog'laning:\n\n📩 ${ADMIN_USERNAME}\n\n_Username bosib xabar yuboring\\._`,
     quiz_welcome: (total, done, xp) =>
       `🧠 *ICT Test*\n\n📊 Jami savollar: ${total}\n✅ Bajarildi: ${done}\n⭐ XP to'plandi: ${xp}\n\n_To'g'ri javob \\= XP ball_\n_Boshlaylikmi?_`,
     quiz_already_done: '✅ Bu savolga allaqachon javob berdingiz!',
-    quiz_correct: (xp) => `✅ *To\'g\'ri! +${xp} XP*`,
+    quiz_correct: (xp) => `✅ *To'g'ri! +${xp} XP*`,
     quiz_wrong: '❌ *Noto\'g\'ri!*',
     quiz_explanation: 'ℹ️',
     quiz_progress: (done, total) => `📊 Jarayon: ${done}/${total}`,
     quiz_next: '➡️ Keyingi savol',
     quiz_finish: '🏁 Tugatish',
     quiz_results: (correct, total, xp) =>
-      `🏆 *Test natijalari*\n\n✅ To\'g\'ri javoblar: ${correct}/${total}\n⭐ XP to\'plandi: ${xp}\n\n${correct >= 80 ? '🎖 ICT Ustasi!' : correct >= 60 ? '📈 Yaxshi natija!' : correct >= 40 ? '📚 O\'rganishni davom ettiring!' : '💪 ICT materiallarini takrorlang!'}`,
+      `🏆 *Test natijalari*\n\n✅ To'g'ri javoblar: ${correct}/${total}\n⭐ XP to'plandi: ${xp}\n\n${correct >= 80 ? '🎖 ICT Ustasi!' : correct >= 60 ? '📈 Yaxshi natija!' : correct >= 40 ? "📚 O'rganishni davom ettiring!" : '💪 ICT materiallarini takrorlang!'}`,
     btn_start_quiz: '▶️ Testni boshlash',
     btn_continue_quiz: '▶️ Davom etish',
     btn_restart_quiz: '🔄 Qayta boshlash',
     quiz_category: (cat, num) => `📌 Kategoriya: ${cat} | Savol #${num}`,
+    no_pdf: "📄 Bu kurs uchun PDF fayl hali qo'shilmagan.",
   },
 };
 
@@ -423,21 +476,22 @@ function t(lang, key, ...args) {
 //  MONGOOSE SCHEMAS
 // ─────────────────────────────────────────────
 const UserSchema = new mongoose.Schema({
-  telegram_id:      { type: Number, required: true, unique: true },
-  fullname:         { type: String, default: '' },
-  username:         { type: String, default: '' },
-  phone:            { type: String, default: '' },
-  language:         { type: String, default: 'ru', enum: ['ru', 'en', 'uz'] },
-  xp:               { type: Number, default: 0 },
-  role:             { type: String, default: 'user', enum: ['user', 'admin'] },
-  exness_verified:  { type: Boolean, default: false },
-  exness_photo_id:  { type: String, default: '' },
-  unlocked_lessons: { type: [String], default: [] },
-  quiz_answers:     { type: Map, of: Boolean, default: {} },
-  quiz_xp_earned:   { type: Number, default: 0 },
-  created_at:       { type: Date, default: Date.now },
+  telegram_id:       { type: Number, required: true, unique: true },
+  fullname:          { type: String, default: '' },
+  username:          { type: String, default: '' },
+  phone:             { type: String, default: '' },
+  language:          { type: String, default: 'ru', enum: ['ru', 'en', 'uz'] },
+  xp:                { type: Number, default: 0 },
+  role:              { type: String, default: 'user', enum: ['user', 'admin'] },
+  exness_verified:   { type: Boolean, default: false },
+  exness_photo_id:   { type: String, default: '' },
+  unlocked_lessons:  { type: [String], default: [] },
+  unlocked_courses:  { type: [String], default: [] }, // course IDs
+  quiz_answers:      { type: Map, of: Boolean, default: {} },
+  quiz_xp_earned:    { type: Number, default: 0 },
+  created_at:        { type: Date, default: Date.now },
 });
-const User = mongoose.model('UserTrading', UserSchema);
+const User = mongoose.model('UserTrading1111', UserSchema);
 
 const SignalSchema = new mongoose.Schema({
   pair:       { type: String, required: true },
@@ -516,14 +570,77 @@ function langInlineKeyboard() {
   return Markup.inlineKeyboard([
     [Markup.button.callback('🇷🇺 Русский',    'lang:ru')],
     [Markup.button.callback('🇺🇸 English',    'lang:en')],
-    [Markup.button.callback('🇺🇿 O\'zbekcha', 'lang:uz')],
+    [Markup.button.callback("🇺🇿 O'zbekcha", 'lang:uz')],
   ]);
+}
+
+// Welcome (unregistered) keyboard
+function welcomeKeyboard(lang) {
+  return Markup.inlineKeyboard([
+    [Markup.button.callback(t(lang, 'btn_start_reg'),      'start_registration')],
+    [Markup.button.callback(t(lang, 'btn_admin_contact'),  'show_admin')],
+    [Markup.button.callback(t(lang, 'btn_select_lang'),    'show_lang_select')],
+  ]);
+}
+
+async function requireRegistration(ctx, user) {
+  const lang = user?.language || 'ru';
+  if (user?.fullname) return true;
+  await ctx.reply(
+    `${t(lang, 'register_prompt_title')}\n\n${t(lang, 'register_prompt_text')}`,
+    {
+      parse_mode: 'MarkdownV2',
+      ...Markup.inlineKeyboard([[Markup.button.url(t(lang, 'btn_register_exness'), EXNESS_LINK)]]),
+    }
+  );
+  return false;
+}
+
+// ─────────────────────────────────────────────
+//  COURSES HELPERS
+// ─────────────────────────────────────────────
+function getCourseTitle(course, lang) {
+  if (lang === 'uz') return course.uz_title;
+  if (lang === 'en') return course.en_title;
+  return course.ru_title;
+}
+
+function getCourseDesc(course, lang) {
+  if (lang === 'uz') return course.uz_desc;
+  if (lang === 'en') return course.en_desc;
+  return course.ru_desc;
+}
+
+async function showCoursesList(ctx, user) {
+  const lang = user.language || 'ru';
+  await ctx.reply(t(lang, 'lessons_title'));
+
+  for (const course of COURSES) {
+    const isUnlocked = user.unlocked_courses && user.unlocked_courses.includes(course.id);
+    const title = getCourseTitle(course, lang);
+    const desc = getCourseDesc(course, lang);
+
+    if (isUnlocked) {
+      // Unlocked — show open button
+      const buttons = [[Markup.button.callback(`📖 ${title}`, `course:open:${course.id}`)]];
+      await ctx.reply(
+        `${course.emoji} *${title}*\n\n${desc}\n\n✅ _Разблокировано_`,
+        { parse_mode: 'Markdown', ...Markup.inlineKeyboard(buttons) }
+      );
+    } else {
+      // Locked — show lock + buy button
+      const buttons = [[Markup.button.callback(`🔒 ${title} — ${course.price} XP`, `course:buy:${course.id}`)]];
+      await ctx.reply(
+        `${course.emoji} *${title}*\n\n${desc}\n\n🔒 _${course.price} XP_`,
+        { parse_mode: 'Markdown', ...Markup.inlineKeyboard(buttons) }
+      );
+    }
+  }
 }
 
 // ─────────────────────────────────────────────
 //  QUIZ HELPERS
 // ─────────────────────────────────────────────
-
 function getQuizStats(user) {
   const answers = user.quiz_answers || new Map();
   const answered = answers instanceof Map ? answers.size : Object.keys(answers).length;
@@ -574,6 +691,7 @@ function buildQuizQuestion(q, lang, questionNumber) {
 //  SCENES (FSM)
 // ─────────────────────────────────────────────
 
+// Registration scene: name → phone only (NO Exness here, Exness handled separately)
 const registrationScene = new Scenes.WizardScene(
   'registration',
 
@@ -616,17 +734,18 @@ const registrationScene = new Scenes.WizardScene(
       { fullname: ctx.wizard.state.fullname, username: ctx.from.username || '', phone }
     );
     await ctx.reply(t(lang, 'reg_success'), { parse_mode: 'MarkdownV2', ...Markup.removeKeyboard() });
-    await new Promise(r => setTimeout(r, 600));
-    await ctx.reply(`${t(lang, 'rules_title')}\n${t(lang, 'rules_text')}`, { parse_mode: 'MarkdownV2' });
-    await new Promise(r => setTimeout(r, 800));
-    await ctx.reply(`${t(lang, 'benefits_title')}\n${t(lang, 'benefits_text')}`, { parse_mode: 'MarkdownV2' });
-    await new Promise(r => setTimeout(r, 800));
+    await new Promise(r => setTimeout(r, 500));
+
+    // After name+phone — show Exness registration link
     await ctx.reply(t(lang, 'exness_prompt'), {
       parse_mode: 'MarkdownV2',
       ...Markup.inlineKeyboard([[Markup.button.url(t(lang, 'btn_register_exness'), EXNESS_LINK)]]),
     });
     await new Promise(r => setTimeout(r, 500));
+
+    // Ask for photo confirmation
     await ctx.reply(t(lang, 'exness_photo_prompt'), { parse_mode: 'MarkdownV2' });
+
     return ctx.scene.enter('exness_verification');
   }
 );
@@ -738,36 +857,52 @@ bot.start(async (ctx) => {
   const user = ctx.dbUser;
   const lang = user?.language || 'ru';
 
+  // If fully registered & verified — show main menu
   if (user?.fullname && user?.exness_verified) {
     await ctx.reply(t(lang, 'main_menu'), { parse_mode: 'MarkdownV2', ...mainMenuKeyboard(lang) });
     return;
   }
 
-  const channelInfoText = [
+  // If registered but not yet verified — remind to send photo
+  if (user?.fullname && !user?.exness_verified) {
+    await ctx.reply(t(lang, 'exness_photo_prompt'), { parse_mode: 'MarkdownV2' });
+    return ctx.scene.enter('exness_verification');
+  }
+
+  // NEW USER — show welcome with bot info + 3 buttons
+  const welcomeText = [
     t(lang, 'welcome_title'),
     t(lang, 'welcome_desc'),
-    t(lang, 'rules_title'),
-    t(lang, 'rules_text'),
+    '',
     t(lang, 'benefits_title'),
     t(lang, 'benefits_text'),
-  ].join('\n\n');
+  ].join('\n');
 
-  await ctx.reply(channelInfoText, {
+  await ctx.reply(welcomeText, {
     parse_mode: 'MarkdownV2',
-    ...Markup.inlineKeyboard([
-      [Markup.button.callback('📖 Правила', 'menu:rules')],
-      [Markup.button.callback('📚 Курсы', 'menu:lessons')],
-      [Markup.button.callback('📈 Сигналы', 'menu:signals')],
-      [Markup.button.callback('🧠 Опросы', 'menu:quiz')],
-      [Markup.button.callback('👤 Профиль', 'menu:profile')],
-      [Markup.button.callback('🛠 Поддержка', 'menu:support')],
-      [Markup.button.callback('🚀 Начать регистрацию', 'start_registration')],
-    ]),
+    ...welcomeKeyboard(lang),
   });
+});
 
-  if (!ADMIN_ID) {
-    await ctx.reply(`⚠️ Добавьте этот ID в файл .env:\n\nADMIN_ID=${ctx.from.id}`);
-  }
+// ─────────────────────────────────────────────
+//  WELCOME KEYBOARD ACTIONS
+// ─────────────────────────────────────────────
+
+// Show admin contact
+bot.action('show_admin', async (ctx) => {
+  await ctx.answerCbQuery();
+  const user = ctx.dbUser;
+  const lang = user?.language || 'ru';
+  await ctx.reply(t(lang, 'admin_contact'), {
+    parse_mode: 'MarkdownV2',
+    ...Markup.inlineKeyboard([[Markup.button.url(`💬 ${ADMIN_USERNAME}`, `https://t.me/${ADMIN_USERNAME.replace('@', '')}`)]])
+  });
+});
+
+// Show language selection (before registration)
+bot.action('show_lang_select', async (ctx) => {
+  await ctx.answerCbQuery();
+  await ctx.reply('🌐 Select language / Выберите язык / Tilni tanlang:', langInlineKeyboard());
 });
 
 // ═══════════════════════════════════════════════════════════════
@@ -778,6 +913,7 @@ bot.action('menu:rules', async (ctx) => {
   await ctx.answerCbQuery();
   const user = ctx.dbUser;
   const lang = user?.language || 'ru';
+  if (!(await requireRegistration(ctx, user))) return;
   await ctx.reply(
     `${t(lang, 'rules_title')}\n${t(lang, 'rules_text')}\n\n${t(lang, 'benefits_title')}\n${t(lang, 'benefits_text')}`,
     { parse_mode: 'MarkdownV2' }
@@ -786,35 +922,108 @@ bot.action('menu:rules', async (ctx) => {
 
 bot.action('menu:channel', async (ctx) => {
   await ctx.answerCbQuery();
+  const user = ctx.dbUser;
+  if (!(await requireRegistration(ctx, user))) return;
   await ctx.reply(`📺 Наш Telegram канал:\n\n${CHANNEL_LINK}`);
 });
 
+// ─── COURSES ───
 bot.action('menu:lessons', async (ctx) => {
   await ctx.answerCbQuery();
   const user = ctx.dbUser;
   const lang = user?.language || 'ru';
 
-  if (!user?.fullname) {
-    await ctx.reply('❌ Пожалуйста, сначала зарегистрируйтесь.');
-    return;
-  }
+  if (!(await requireRegistration(ctx, user))) return;
   if (!user.exness_verified) {
     await ctx.reply(t(lang, 'need_verification'));
     return;
   }
 
-  const lessons = await Lesson.find().sort({ order: 1 });
-  if (!lessons.length) { await ctx.reply('📚 Уроков пока нет.'); return; }
-  await ctx.reply(t(lang, 'lessons_title'));
-  for (const lesson of lessons) {
-    const isUnlocked = lesson.is_free || user.unlocked_lessons.includes(lesson._id.toString());
-    const buttons = isUnlocked
-      ? [[Markup.button.callback(`📖 ${lesson.title}`, `lesson:read:${lesson._id}`)]]
-      : [[Markup.button.callback(`🔒 ${lesson.title} — ${t(lang, 'lesson_buy', lesson.xp_cost)}`, `lesson:buy:${lesson._id}`)]];
+  await showCoursesList(ctx, user);
+});
+
+// Open a course (unlocked)
+bot.action(/^course:open:(.+)$/, async (ctx) => {
+  await ctx.answerCbQuery();
+  const user = ctx.dbUser;
+  const lang = user?.language || 'ru';
+  const courseId = ctx.match[1];
+  const course = COURSES.find(c => c.id === courseId);
+  if (!course) return;
+
+  const isUnlocked = user.unlocked_courses && user.unlocked_courses.includes(courseId);
+  if (!isUnlocked) {
+    await ctx.reply(t(lang, 'course_locked_msg', course.price, user.xp), { parse_mode: 'MarkdownV2' });
+    return;
+  }
+
+  const title = getCourseTitle(course, lang);
+  const desc = getCourseDesc(course, lang);
+
+  await ctx.reply(`${course.emoji} *${title}*\n\n${desc}`, { parse_mode: 'Markdown' });
+
+  // Send PDF files if any
+  if (course.pdf && course.pdf.length > 0) {
+    for (const pdfFileId of course.pdf) {
+      if (pdfFileId) {
+        try {
+          await ctx.replyWithDocument(pdfFileId, { caption: `📄 ${title}` });
+        } catch (e) {
+          console.error('PDF send error:', e.message);
+        }
+      }
+    }
+  } else {
+    await ctx.reply(t(lang, 'no_pdf'));
+  }
+});
+
+// Buy a course
+bot.action(/^course:buy:(.+)$/, async (ctx) => {
+  await ctx.answerCbQuery();
+  const user = await User.findOne({ telegram_id: ctx.from.id });
+  const lang = user?.language || 'ru';
+  const courseId = ctx.match[1];
+  const course = COURSES.find(c => c.id === courseId);
+  if (!course) return;
+
+  if (user.unlocked_courses && user.unlocked_courses.includes(courseId)) {
+    await ctx.reply(t(lang, 'lesson_bought'));
+    return;
+  }
+
+  if (user.xp < course.price) {
     await ctx.reply(
-      [`${isUnlocked ? '✅' : '🔒'} ${lesson.title}`, `💰 Стоимость: ${lesson.is_free ? 'Бесплатно' : lesson.xp_cost + ' XP'}`].join('\n'),
-      Markup.inlineKeyboard(buttons)
+      t(lang, 'course_locked_msg', course.price, user.xp),
+      { parse_mode: 'MarkdownV2' }
     );
+    return;
+  }
+
+  await User.findOneAndUpdate(
+    { telegram_id: ctx.from.id },
+    { $inc: { xp: -course.price }, $push: { unlocked_courses: courseId } }
+  );
+
+  await ctx.reply(t(lang, 'lesson_bought'));
+
+  // Immediately show course content
+  const title = getCourseTitle(course, lang);
+  const desc = getCourseDesc(course, lang);
+  await ctx.reply(`${course.emoji} *${title}*\n\n${desc}`, { parse_mode: 'Markdown' });
+
+  if (course.pdf && course.pdf.length > 0) {
+    for (const pdfFileId of course.pdf) {
+      if (pdfFileId) {
+        try {
+          await ctx.replyWithDocument(pdfFileId, { caption: `📄 ${title}` });
+        } catch (e) {
+          console.error('PDF send error:', e.message);
+        }
+      }
+    }
+  } else {
+    await ctx.reply(t(lang, 'no_pdf'));
   }
 });
 
@@ -823,10 +1032,7 @@ bot.action('menu:signals', async (ctx) => {
   const user = ctx.dbUser;
   const lang = user?.language || 'ru';
 
-  if (!user?.fullname) {
-    await ctx.reply('❌ Пожалуйста, сначала зарегистрируйтесь.');
-    return;
-  }
+  if (!(await requireRegistration(ctx, user))) return;
   if (!user.exness_verified) {
     await ctx.reply(t(lang, 'need_verification'));
     return;
@@ -850,10 +1056,7 @@ bot.action('menu:quiz', async (ctx) => {
   const user = ctx.dbUser;
   const lang = user?.language || 'ru';
 
-  if (!user?.fullname) {
-    await ctx.reply('❌ Пожалуйста, сначала зарегистрируйтесь.');
-    return;
-  }
+  if (!(await requireRegistration(ctx, user))) return;
   if (!user.exness_verified) {
     await ctx.reply(t(lang, 'need_verification'));
     return;
@@ -867,10 +1070,7 @@ bot.action('menu:profile', async (ctx) => {
   const user = ctx.dbUser;
   const lang = user?.language || 'ru';
 
-  if (!user?.fullname) {
-    await ctx.reply('❌ Пожалуйста, сначала зарегистрируйтесь.');
-    return;
-  }
+  if (!(await requireRegistration(ctx, user))) return;
 
   const dateStr = new Date(user.created_at).toLocaleDateString(
     lang === 'ru' ? 'ru-RU' : lang === 'uz' ? 'uz-UZ' : 'en-US'
@@ -891,10 +1091,7 @@ bot.action('menu:support', async (ctx) => {
   const user = ctx.dbUser;
   const lang = user?.language || 'ru';
 
-  if (!user?.fullname) {
-    await ctx.reply('❌ Пожалуйста, сначала зарегистрируйтесь.');
-    return;
-  }
+  if (!(await requireRegistration(ctx, user))) return;
 
   return ctx.scene.enter('support');
 });
@@ -970,8 +1167,21 @@ bot.action(/^lang:(.+)$/, async (ctx) => {
   if (!['ru', 'en', 'uz'].includes(newLang)) return ctx.answerCbQuery('❌');
   await User.findOneAndUpdate({ telegram_id: ctx.from.id }, { language: newLang });
   await ctx.answerCbQuery(LOCALES[newLang].lang_changed);
-  await ctx.editMessageText(LOCALES[newLang].lang_changed);
-  await ctx.reply(t(newLang, 'main_menu'), { parse_mode: 'MarkdownV2', ...mainMenuKeyboard(newLang) });
+  try { await ctx.editMessageText(LOCALES[newLang].lang_changed); } catch {}
+  const user = await User.findOne({ telegram_id: ctx.from.id });
+  if (user?.fullname && user?.exness_verified) {
+    await ctx.reply(t(newLang, 'main_menu'), { parse_mode: 'MarkdownV2', ...mainMenuKeyboard(newLang) });
+  } else {
+    // Show welcome again with updated language
+    const welcomeText = [
+      t(newLang, 'welcome_title'),
+      t(newLang, 'welcome_desc'),
+      '',
+      t(newLang, 'benefits_title'),
+      t(newLang, 'benefits_text'),
+    ].join('\n');
+    await ctx.reply(welcomeText, { parse_mode: 'MarkdownV2', ...welcomeKeyboard(newLang) });
+  }
 });
 
 // ─────────────────────────────────────────────
@@ -1119,122 +1329,8 @@ bot.action('quiz:restart', async (ctx) => {
 });
 
 // ─────────────────────────────────────────────
-//  MAIN MENU TEXT HANDLERS
+//  PROFILE ACTIONS
 // ─────────────────────────────────────────────
-function matchMenuButton(text, key) {
-  return ['ru', 'en', 'uz'].some(l => LOCALES[l][key] === text);
-}
-
-bot.on('text', async (ctx, next) => {
-  const user = ctx.dbUser;
-  if (!user?.fullname) return next();
-
-  const lang = user.language;
-  const txt  = ctx.message.text;
-
-  if (matchMenuButton(txt, 'btn_quiz')) {
-    if (!user.exness_verified) {
-      await ctx.reply(t(lang, 'need_verification'));
-      return;
-    }
-    await showQuizMenu(ctx, user);
-    return;
-  }
-
-  if (matchMenuButton(txt, 'btn_rules')) {
-    await ctx.reply(
-      `${t(lang, 'rules_title')}\n${t(lang, 'rules_text')}\n\n${t(lang, 'benefits_title')}\n${t(lang, 'benefits_text')}`,
-      { parse_mode: 'MarkdownV2' }
-    );
-    return;
-  }
-
-  if (matchMenuButton(txt, 'btn_profile')) {
-    const dateStr = new Date(user.created_at).toLocaleDateString(
-      lang === 'ru' ? 'ru-RU' : lang === 'uz' ? 'uz-UZ' : 'en-US'
-    );
-    await ctx.reply(
-      `${t(lang, 'profile_title')}\n${t(lang, 'profile_text', user, dateStr)}`,
-      {
-        ...Markup.inlineKeyboard([
-          [Markup.button.callback(t(lang, 'btn_change_lang'), 'open_lang')],
-          [Markup.button.callback(t(lang, 'btn_refresh'),     'refresh_profile')],
-        ]),
-      }
-    );
-    return;
-  }
-
-  if (matchMenuButton(txt, 'btn_support')) {
-    if (!user.exness_verified) { await ctx.reply(t(lang, 'need_verification')); return; }
-    return ctx.scene.enter('support');
-  }
-
-  if (matchMenuButton(txt, 'btn_channel')) {
-    await ctx.reply(`📺 Наш Telegram канал:\n\n${CHANNEL_LINK}`);
-    return;
-  }
-
-  if (matchMenuButton(txt, 'btn_lessons')) {
-    if (!user.exness_verified) { await ctx.reply(t(lang, 'need_verification')); return; }
-    const lessons = await Lesson.find().sort({ order: 1 });
-    if (!lessons.length) { await ctx.reply('📚 Уроков пока нет.'); return; }
-    await ctx.reply(t(lang, 'lessons_title'));
-    for (const lesson of lessons) {
-      const isUnlocked = lesson.is_free || user.unlocked_lessons.includes(lesson._id.toString());
-      const buttons = isUnlocked
-        ? [[Markup.button.callback(`📖 ${lesson.title}`, `lesson:read:${lesson._id}`)]]
-        : [[Markup.button.callback(`🔒 ${lesson.title} — ${t(lang, 'lesson_buy', lesson.xp_cost)}`, `lesson:buy:${lesson._id}`)]];
-      await ctx.reply(
-        [`${isUnlocked ? '✅' : '🔒'} ${lesson.title}`, `💰 Стоимость: ${lesson.is_free ? 'Бесплатно' : lesson.xp_cost + ' XP'}`].join('\n'),
-        Markup.inlineKeyboard(buttons)
-      );
-    }
-    return;
-  }
-
-  if (matchMenuButton(txt, 'btn_signals')) {
-    if (!user.exness_verified) { await ctx.reply(t(lang, 'need_verification')); return; }
-    const signals = await Signal.find({ status: 'active' }).sort({ created_at: -1 }).limit(10);
-    await ctx.reply(t(lang, 'signals_title'));
-    if (!signals.length) { await ctx.reply(t(lang, 'no_signals')); return; }
-    for (const sig of signals) {
-      const emoji = sig.direction === 'BUY' ? '📈' : '📉';
-      const statusEmoji = { active: '🟢', closed: '⚪', cancelled: '🔴' }[sig.status];
-      const date = new Date(sig.created_at).toLocaleString(lang === 'ru' ? 'ru-RU' : 'en-US');
-      await ctx.reply(
-        [`${emoji} ${sig.pair} — ${sig.direction}`, ``, `📌 Вход:  ${sig.entry}`, `🎯 TP:    ${sig.tp}`, `🛡 SL:    ${sig.sl}`, sig.pips ? `💰 Pips: ${sig.pips}` : '', ``, `${statusEmoji} Статус: ${sig.status.toUpperCase()}`, `⏰ ${date}`].filter(Boolean).join('\n')
-      );
-    }
-    return;
-  }
-
-  return next();
-});
-
-bot.action(/^lesson:read:(.+)$/, async (ctx) => {
-  const lessonId = ctx.match[1];
-  const lesson = await Lesson.findById(lessonId);
-  if (!lesson) return ctx.answerCbQuery('❌ Урок не найден');
-  await ctx.answerCbQuery();
-  await ctx.reply([`📖 ${lesson.title}`, '', lesson.content].join('\n'));
-});
-
-bot.action(/^lesson:buy:(.+)$/, async (ctx) => {
-  const user = ctx.dbUser;
-  const lang = user?.language || 'ru';
-  const lessonId = ctx.match[1];
-  const lesson = await Lesson.findById(lessonId);
-  if (!lesson) return ctx.answerCbQuery('❌');
-  if (user.xp < lesson.xp_cost) return ctx.answerCbQuery(t(lang, 'not_enough_xp'));
-  await User.findOneAndUpdate(
-    { telegram_id: ctx.from.id },
-    { $inc: { xp: -lesson.xp_cost }, $push: { unlocked_lessons: lessonId } }
-  );
-  await ctx.answerCbQuery(t(lang, 'lesson_bought'));
-  await ctx.editMessageText([`✅ ${lesson.title}`, '', lesson.content].join('\n'));
-});
-
 bot.action('open_lang', async (ctx) => {
   await ctx.answerCbQuery();
   const user = ctx.dbUser;
@@ -1259,6 +1355,46 @@ bot.action('refresh_profile', async (ctx) => {
 });
 
 // ─────────────────────────────────────────────
+//  LESSON ACTIONS (legacy support)
+// ─────────────────────────────────────────────
+bot.action(/^lesson:read:(.+)$/, async (ctx) => {
+  const lessonId = ctx.match[1];
+  const lesson = await Lesson.findById(lessonId);
+  if (!lesson) return ctx.answerCbQuery('❌ Урок не найден');
+  await ctx.answerCbQuery();
+  await ctx.reply([`📖 ${lesson.title}`, '', lesson.content].join('\n'));
+});
+
+bot.action(/^lesson:buy:(.+)$/, async (ctx) => {
+  const user = ctx.dbUser;
+  const lang = user?.language || 'ru';
+  const lessonId = ctx.match[1];
+  const lesson = await Lesson.findById(lessonId);
+  if (!lesson) return ctx.answerCbQuery('❌');
+  if (user.xp < lesson.xp_cost) return ctx.answerCbQuery(t(lang, 'not_enough_xp'));
+  await User.findOneAndUpdate(
+    { telegram_id: ctx.from.id },
+    { $inc: { xp: -lesson.xp_cost }, $push: { unlocked_lessons: lessonId } }
+  );
+  await ctx.answerCbQuery(t(lang, 'lesson_bought'));
+  await ctx.editMessageText([`✅ ${lesson.title}`, '', lesson.content].join('\n'));
+});
+
+// ─────────────────────────────────────────────
+//  TEXT HANDLER (fallback)
+// ─────────────────────────────────────────────
+bot.on('message', async (ctx) => {
+  const user = ctx.dbUser;
+  if (!user?.fullname) {
+    await ctx.reply('👋 Нажмите /start чтобы начать.');
+  }
+});
+
+bot.catch((err, ctx) => {
+  console.error(`[Bot Error] ${ctx?.updateType}:`, err.message || err);
+});
+
+// ─────────────────────────────────────────────
 //  ADMIN COMMANDS
 // ─────────────────────────────────────────────
 function isAdmin(ctx) { return ctx.from?.id === ADMIN_ID; }
@@ -1266,7 +1402,7 @@ function isAdmin(ctx) { return ctx.from?.id === ADMIN_ID; }
 bot.command('admin', async (ctx) => {
   if (!isAdmin(ctx)) return;
   await ctx.reply(
-    ['👑 Панель администратора', '', '📋 Доступные команды:', '/users — Список пользователей', '/stats — Статистика', '/broadcast <текст> — Рассылка всем', '/signal — Добавить сигнал', '/addlesson — Добавить урок', '/addxp <id> <amount> — Начислить XP'].join('\n')
+    ['👑 Панель администратора', '', '📋 Доступные команды:', '/users — Список пользователей', '/stats — Статистика', '/broadcast <текст> — Рассылка всем', '/signal — Добавить сигнал', '/addlesson — Добавить урок (legacy)', '/addxp <id> <amount> — Начислить XP', '/addcoursepdf <course_id> <file_id> — Добавить PDF к курсу'].join('\n')
   );
 });
 
@@ -1288,9 +1424,8 @@ bot.command('stats', async (ctx) => {
   const today    = new Date(); today.setHours(0, 0, 0, 0);
   const newToday = await User.countDocuments({ created_at: { $gte: today } });
   const signals  = await Signal.countDocuments();
-  const lessons  = await Lesson.countDocuments();
   await ctx.reply(
-    ['📊 Статистика бота', '', `👥 Всего пользователей: ${total}`, `✅ Верифицировано: ${verified}`, `⏳ Ожидают: ${pending}`, `🆕 Новых сегодня: ${newToday}`, '', `📈 Сигналов: ${signals}`, `📚 Уроков: ${lessons}`, `🧠 Вопросов в квизе: ${QUIZ_QUESTIONS.length}`].join('\n')
+    ['📊 Статистика бота', '', `👥 Всего пользователей: ${total}`, `✅ Верифицировано: ${verified}`, `⏳ Ожидают: ${pending}`, `🆕 Новых сегодня: ${newToday}`, '', `📈 Сигналов: ${signals}`, `📚 Курсов: ${COURSES.length}`, `🧠 Вопросов в квизе: ${QUIZ_QUESTIONS.length}`].join('\n')
   );
 });
 
@@ -1309,6 +1444,34 @@ bot.command('broadcast', async (ctx) => {
     await new Promise(r => setTimeout(r, 50));
   }
   await ctx.reply(`✅ Отправлено: ${sent}\n❌ Ошибок: ${failed}`);
+});
+
+// Admin: add PDF to a course by file_id
+// Usage: /addcoursepdf hcs AgACAgIAA...
+bot.command('addcoursepdf', async (ctx) => {
+  if (!isAdmin(ctx)) return;
+  const parts = ctx.message.text.split(' ');
+  if (parts.length < 3) {
+    const courseIds = COURSES.map(c => `• ${c.id} — ${c.ru_title}`).join('\n');
+    await ctx.reply(`Usage: /addcoursepdf <course_id> <file_id>\n\nДоступные курсы:\n${courseIds}`);
+    return;
+  }
+  const courseId = parts[1];
+  const fileId = parts[2];
+  const course = COURSES.find(c => c.id === courseId);
+  if (!course) {
+    await ctx.reply(`❌ Курс "${courseId}" не найден.\n\nДоступные: ${COURSES.map(c => c.id).join(', ')}`);
+    return;
+  }
+  course.pdf.push(fileId);
+  await ctx.reply(`✅ PDF добавлен к курсу "${course.ru_title}"\nFile ID: ${fileId}\nВсего PDF в курсе: ${course.pdf.length}`);
+});
+
+// Admin: list course IDs
+bot.command('courses', async (ctx) => {
+  if (!isAdmin(ctx)) return;
+  const list = COURSES.map(c => `• ${c.id}\n  RU: ${c.ru_title}\n  UZ: ${c.uz_title}\n  💰 ${c.price} XP\n  PDF: ${c.pdf.length} файл(ов)`).join('\n\n');
+  await ctx.reply(`📚 Курсы:\n\n${list}`);
 });
 
 const signalWizard = new Scenes.WizardScene(
@@ -1429,17 +1592,6 @@ bot.command('addlesson', async (ctx) => {
   return ctx.scene.enter('lesson_wizard');
 });
 
-bot.on('message', async (ctx) => {
-  const user = ctx.dbUser;
-  if (!user?.fullname) {
-    await ctx.reply('👋 Нажмите /start чтобы начать.');
-  }
-});
-
-bot.catch((err, ctx) => {
-  console.error(`[Bot Error] ${ctx?.updateType}:`, err.message || err);
-});
-
 // ─────────────────────────────────────────────
 //  LAUNCH
 // ─────────────────────────────────────────────
@@ -1452,6 +1604,7 @@ async function main() {
     console.log(`👑 Admin ID: ${ADMIN_ID}`);
     console.log(`📢 Channel: ${CHANNEL_LINK}`);
     console.log(`🧠 Quiz questions loaded: ${QUIZ_QUESTIONS.length}`);
+    console.log(`📚 Courses loaded: ${COURSES.length}`);
   } catch (err) {
     console.error('❌ Failed to start:', err.message);
     process.exit(1);
