@@ -516,7 +516,7 @@ const UserSchema = new mongoose.Schema({
   quiz_xp_earned:    { type: Number, default: 0 },
   created_at:        { type: Date, default: Date.now },
 });
-const User = mongoose.model('UserTrading1111', UserSchema);
+const User = mongoose.model('UserTrading1111111', UserSchema);
 
 const SignalSchema = new mongoose.Schema({
   pair:       { type: String, required: true },
