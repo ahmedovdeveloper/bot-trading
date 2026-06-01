@@ -12,7 +12,7 @@ const MONGO_URI    = process.env.MONGO_URI    || 'mongodb+srv://akhmad1232131231
 const ADMIN_ID     = process.env.ADMIN_ID ? parseInt(process.env.ADMIN_ID, 10) : 7553920926;
 const EXNESS_LINK  = process.env.EXNESS_REF_LINK || 'https://one.exnessonelink.com/a/3a6rcif6lv';
 const CHANNEL_LINK = process.env.CHANNEL_LINK || 'https://t.me/axmadostrade';
-const ADMIN_USERNAME = '@AXMV12';
+const ADMIN_USERNAME = '@retestbuyGold';
 
 if (!BOT_TOKEN) { console.error('❌  BOT_TOKEN is missing in .env'); process.exit(1); }
 
