@@ -1,5 +1,31 @@
 'use strict';
 
+// ─────────────────────────────────────────────
+//  KEEP-ALIVE SERVER (Render 24/7 uchun)
+// ─────────────────────────────────────────────
+const http = require('http');
+const PORT = process.env.PORT || 3000;
+const RENDER_URL = process.env.RENDER_EXTERNAL_URL || 'https://bot-trading-jvxk.onrender.com';
+
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('✅ TradePro Bot is running!');
+});
+
+server.listen(PORT, () => {
+  console.log(`🌐 HTTP server listening on port ${PORT}`);
+});
+
+if (RENDER_URL) {
+  setInterval(() => {
+    http.get(RENDER_URL, (res) => {
+      console.log(`🔄 Self-ping: ${res.statusCode} — ${new Date().toISOString()}`);
+    }).on('error', (err) => {
+      console.error('⚠️ Self-ping error:', err.message);
+    });
+  }, 7 * 60 * 1000); // har 7 daqiqada
+}
+
 require('dotenv').config();
 const { Telegraf, Markup, Scenes, session } = require('telegraf');
 const mongoose = require('mongoose');
@@ -7,12 +33,12 @@ const mongoose = require('mongoose');
 // ─────────────────────────────────────────────
 //  CONFIGURATION
 // ─────────────────────────────────────────────
-const BOT_TOKEN    = process.env.BOT_TOKEN    || "8820876470:AAFVbV2fnQY-5NXu2225QpD7e0UwQ5g2-_k";
+const BOT_TOKEN    = process.env.BOT_TOKEN    || "8820876470:AAF4alH7Go7N83JRlfD0oCzlOstVjUea7JA";
 const MONGO_URI    = process.env.MONGO_URI    || 'mongodb+srv://akhmad12321312313:3kINAcgdXW0YdPj5@ahmad.y82yqis.mongodb.net/';
 const ADMIN_ID     = process.env.ADMIN_ID ? parseInt(process.env.ADMIN_ID, 10) : 7553920926;
 const EXNESS_LINK  = process.env.EXNESS_REF_LINK || 'https://one.exnessonelink.com/a/3a6rcif6lv';
 const CHANNEL_LINK = process.env.CHANNEL_LINK || 'https://t.me/axmadostrade';
-const ADMIN_USERNAME = '@retestbuyGold';
+const ADMIN_USERNAME = '@AXMV12';
 
 if (!BOT_TOKEN) { console.error('❌  BOT_TOKEN is missing in .env'); process.exit(1); }
 
@@ -25,8 +51,7 @@ function escMD(text) {
 }
 
 // ─────────────────────────────────────────────
-//  COURSES (Darsliklar / Курсы)
-//  PDF массивини bo'sh qoldirishingiz mumkin, keyin to'ldirish uchun
+//  COURSES
 // ─────────────────────────────────────────────
 const COURSES = [
   {
@@ -39,7 +64,7 @@ const COURSES = [
     en_desc: "Course explaining how HCS (Higher Candle Wick Structure) forms on the market.",
     price: 100,
     emoji: "📊",
-    pdf: ["https://www.dropbox.com/scl/fi/2uqd8fteqvdp7jgeamx3l/HCS-ffffffffffffff-1.pptx?rlkey=kr0jhfa15wf5ly5l8rj6ewp70&st=0dj17wnq&dl=0"], // PDF file_id larini shu yerga qo'shing
+    pdf: ["https://www.dropbox.com/scl/fi/2uqd8fteqvdp7jgeamx3l/HCS-ffffffffffffff-1.pptx?rlkey=kr0jhfa15wf5ly5l8rj6ewp70&st=0dj17wnq&dl=0"],
   },
   {
     id: '2x negation',
@@ -486,7 +511,7 @@ const UserSchema = new mongoose.Schema({
   exness_verified:   { type: Boolean, default: false },
   exness_photo_id:   { type: String, default: '' },
   unlocked_lessons:  { type: [String], default: [] },
-  unlocked_courses:  { type: [String], default: [] }, // course IDs
+  unlocked_courses:  { type: [String], default: [] },
   quiz_answers:      { type: Map, of: Boolean, default: {} },
   quiz_xp_earned:    { type: Number, default: 0 },
   created_at:        { type: Date, default: Date.now },
@@ -574,7 +599,6 @@ function langInlineKeyboard() {
   ]);
 }
 
-// Welcome (unregistered) keyboard
 function welcomeKeyboard(lang) {
   return Markup.inlineKeyboard([
     [Markup.button.callback(t(lang, 'btn_start_reg'),      'start_registration')],
@@ -621,14 +645,12 @@ async function showCoursesList(ctx, user) {
     const desc = getCourseDesc(course, lang);
 
     if (isUnlocked) {
-      // Unlocked — show open button
       const buttons = [[Markup.button.callback(`📖 ${title}`, `course:open:${course.id}`)]];
       await ctx.reply(
         `${course.emoji} *${title}*\n\n${desc}\n\n✅ _Разблокировано_`,
         { parse_mode: 'Markdown', ...Markup.inlineKeyboard(buttons) }
       );
     } else {
-      // Locked — show lock + buy button
       const buttons = [[Markup.button.callback(`🔒 ${title} — ${course.price} XP`, `course:buy:${course.id}`)]];
       await ctx.reply(
         `${course.emoji} *${title}*\n\n${desc}\n\n🔒 _${course.price} XP_`,
@@ -690,8 +712,6 @@ function buildQuizQuestion(q, lang, questionNumber) {
 // ─────────────────────────────────────────────
 //  SCENES (FSM)
 // ─────────────────────────────────────────────
-
-// Registration scene: name → phone only (NO Exness here, Exness handled separately)
 const registrationScene = new Scenes.WizardScene(
   'registration',
 
@@ -735,17 +755,12 @@ const registrationScene = new Scenes.WizardScene(
     );
     await ctx.reply(t(lang, 'reg_success'), { parse_mode: 'MarkdownV2', ...Markup.removeKeyboard() });
     await new Promise(r => setTimeout(r, 500));
-
-    // After name+phone — show Exness registration link
     await ctx.reply(t(lang, 'exness_prompt'), {
       parse_mode: 'MarkdownV2',
       ...Markup.inlineKeyboard([[Markup.button.url(t(lang, 'btn_register_exness'), EXNESS_LINK)]]),
     });
     await new Promise(r => setTimeout(r, 500));
-
-    // Ask for photo confirmation
     await ctx.reply(t(lang, 'exness_photo_prompt'), { parse_mode: 'MarkdownV2' });
-
     return ctx.scene.enter('exness_verification');
   }
 );
@@ -857,19 +872,16 @@ bot.start(async (ctx) => {
   const user = ctx.dbUser;
   const lang = user?.language || 'ru';
 
-  // If fully registered & verified — show main menu
   if (user?.fullname && user?.exness_verified) {
     await ctx.reply(t(lang, 'main_menu'), { parse_mode: 'MarkdownV2', ...mainMenuKeyboard(lang) });
     return;
   }
 
-  // If registered but not yet verified — remind to send photo
   if (user?.fullname && !user?.exness_verified) {
     await ctx.reply(t(lang, 'exness_photo_prompt'), { parse_mode: 'MarkdownV2' });
     return ctx.scene.enter('exness_verification');
   }
 
-  // NEW USER — show welcome with bot info + 3 buttons
   const welcomeText = [
     t(lang, 'welcome_title'),
     t(lang, 'welcome_desc'),
@@ -887,8 +899,6 @@ bot.start(async (ctx) => {
 // ─────────────────────────────────────────────
 //  WELCOME KEYBOARD ACTIONS
 // ─────────────────────────────────────────────
-
-// Show admin contact
 bot.action('show_admin', async (ctx) => {
   await ctx.answerCbQuery();
   const user = ctx.dbUser;
@@ -899,7 +909,6 @@ bot.action('show_admin', async (ctx) => {
   });
 });
 
-// Show language selection (before registration)
 bot.action('show_lang_select', async (ctx) => {
   await ctx.answerCbQuery();
   await ctx.reply('🌐 Select language / Выберите язык / Tilni tanlang:', langInlineKeyboard());
@@ -908,7 +917,6 @@ bot.action('show_lang_select', async (ctx) => {
 // ═══════════════════════════════════════════════════════════════
 //  MENU HANDLERS
 // ═══════════════════════════════════════════════════════════════
-
 bot.action('menu:rules', async (ctx) => {
   await ctx.answerCbQuery();
   const user = ctx.dbUser;
@@ -927,22 +935,18 @@ bot.action('menu:channel', async (ctx) => {
   await ctx.reply(`📺 Наш Telegram канал:\n\n${CHANNEL_LINK}`);
 });
 
-// ─── COURSES ───
 bot.action('menu:lessons', async (ctx) => {
   await ctx.answerCbQuery();
   const user = ctx.dbUser;
   const lang = user?.language || 'ru';
-
   if (!(await requireRegistration(ctx, user))) return;
   if (!user.exness_verified) {
     await ctx.reply(t(lang, 'need_verification'));
     return;
   }
-
   await showCoursesList(ctx, user);
 });
 
-// Open a course (unlocked)
 bot.action(/^course:open:(.+)$/, async (ctx) => {
   await ctx.answerCbQuery();
   const user = ctx.dbUser;
@@ -959,10 +963,8 @@ bot.action(/^course:open:(.+)$/, async (ctx) => {
 
   const title = getCourseTitle(course, lang);
   const desc = getCourseDesc(course, lang);
-
   await ctx.reply(`${course.emoji} *${title}*\n\n${desc}`, { parse_mode: 'Markdown' });
 
-  // Send PDF files if any
   if (course.pdf && course.pdf.length > 0) {
     for (const pdfFileId of course.pdf) {
       if (pdfFileId) {
@@ -978,7 +980,6 @@ bot.action(/^course:open:(.+)$/, async (ctx) => {
   }
 });
 
-// Buy a course
 bot.action(/^course:buy:(.+)$/, async (ctx) => {
   await ctx.answerCbQuery();
   const user = await User.findOne({ telegram_id: ctx.from.id });
@@ -993,10 +994,7 @@ bot.action(/^course:buy:(.+)$/, async (ctx) => {
   }
 
   if (user.xp < course.price) {
-    await ctx.reply(
-      t(lang, 'course_locked_msg', course.price, user.xp),
-      { parse_mode: 'MarkdownV2' }
-    );
+    await ctx.reply(t(lang, 'course_locked_msg', course.price, user.xp), { parse_mode: 'MarkdownV2' });
     return;
   }
 
@@ -1007,7 +1005,6 @@ bot.action(/^course:buy:(.+)$/, async (ctx) => {
 
   await ctx.reply(t(lang, 'lesson_bought'));
 
-  // Immediately show course content
   const title = getCourseTitle(course, lang);
   const desc = getCourseDesc(course, lang);
   await ctx.reply(`${course.emoji} *${title}*\n\n${desc}`, { parse_mode: 'Markdown' });
@@ -1031,13 +1028,11 @@ bot.action('menu:signals', async (ctx) => {
   await ctx.answerCbQuery();
   const user = ctx.dbUser;
   const lang = user?.language || 'ru';
-
   if (!(await requireRegistration(ctx, user))) return;
   if (!user.exness_verified) {
     await ctx.reply(t(lang, 'need_verification'));
     return;
   }
-
   const signals = await Signal.find({ status: 'active' }).sort({ created_at: -1 }).limit(10);
   await ctx.reply(t(lang, 'signals_title'));
   if (!signals.length) { await ctx.reply(t(lang, 'no_signals')); return; }
@@ -1055,13 +1050,11 @@ bot.action('menu:quiz', async (ctx) => {
   await ctx.answerCbQuery();
   const user = ctx.dbUser;
   const lang = user?.language || 'ru';
-
   if (!(await requireRegistration(ctx, user))) return;
   if (!user.exness_verified) {
     await ctx.reply(t(lang, 'need_verification'));
     return;
   }
-
   await showQuizMenu(ctx, user);
 });
 
@@ -1069,9 +1062,7 @@ bot.action('menu:profile', async (ctx) => {
   await ctx.answerCbQuery();
   const user = ctx.dbUser;
   const lang = user?.language || 'ru';
-
   if (!(await requireRegistration(ctx, user))) return;
-
   const dateStr = new Date(user.created_at).toLocaleDateString(
     lang === 'ru' ? 'ru-RU' : lang === 'uz' ? 'uz-UZ' : 'en-US'
   );
@@ -1090,9 +1081,7 @@ bot.action('menu:support', async (ctx) => {
   await ctx.answerCbQuery();
   const user = ctx.dbUser;
   const lang = user?.language || 'ru';
-
   if (!(await requireRegistration(ctx, user))) return;
-
   return ctx.scene.enter('support');
 });
 
@@ -1172,7 +1161,6 @@ bot.action(/^lang:(.+)$/, async (ctx) => {
   if (user?.fullname && user?.exness_verified) {
     await ctx.reply(t(newLang, 'main_menu'), { parse_mode: 'MarkdownV2', ...mainMenuKeyboard(newLang) });
   } else {
-    // Show welcome again with updated language
     const welcomeText = [
       t(newLang, 'welcome_title'),
       t(newLang, 'welcome_desc'),
@@ -1187,12 +1175,10 @@ bot.action(/^lang:(.+)$/, async (ctx) => {
 // ─────────────────────────────────────────────
 //  QUIZ ACTIONS
 // ─────────────────────────────────────────────
-
 async function showQuizMenu(ctx, user) {
   const lang = user.language || 'ru';
   const stats = getQuizStats(user);
   const total = QUIZ_QUESTIONS.length;
-
   const buttons = [];
 
   if (stats.answered < total) {
@@ -1216,12 +1202,10 @@ bot.action('quiz:next', async (ctx) => {
   await ctx.answerCbQuery();
   const user = await User.findOne({ telegram_id: ctx.from.id });
   if (!user) return;
-
   if (!user.exness_verified) {
     await ctx.reply(t(user.language, 'need_verification'));
     return;
   }
-
   const q = getNextQuestion(user);
   if (!q) {
     const stats = getQuizStats(user);
@@ -1231,22 +1215,18 @@ bot.action('quiz:next', async (ctx) => {
     );
     return;
   }
-
   const stats = getQuizStats(user);
   const questionNumber = stats.answered + 1;
   const { text, buttons } = buildQuizQuestion(q, user.language, questionNumber);
-
   await ctx.reply(text, { parse_mode: 'Markdown', ...Markup.inlineKeyboard(buttons) });
 });
 
 bot.action(/^quiz:answer:(\d+):(\d+)$/, async (ctx) => {
   await ctx.answerCbQuery();
-
   const questionId = parseInt(ctx.match[1], 10);
   const optionIndex = parseInt(ctx.match[2], 10);
   const user = await User.findOne({ telegram_id: ctx.from.id });
   if (!user) return;
-
   const lang = user.language || 'ru';
 
   if (hasAnswered(user, questionId)) {
@@ -1263,10 +1243,7 @@ bot.action(/^quiz:answer:(\d+):(\d+)$/, async (ctx) => {
   if (isCorrect) {
     await User.findOneAndUpdate(
       { telegram_id: ctx.from.id },
-      {
-        $set: { [`quiz_answers.${questionId}`]: true },
-        $inc: { xp: q.xp, quiz_xp_earned: q.xp },
-      }
+      { $set: { [`quiz_answers.${questionId}`]: true }, $inc: { xp: q.xp, quiz_xp_earned: q.xp } }
     );
   } else {
     await User.findOneAndUpdate(
@@ -1276,16 +1253,9 @@ bot.action(/^quiz:answer:(\d+):(\d+)$/, async (ctx) => {
   }
 
   const correctAnswer = `${letters[q.correct]}) ${q.options[q.correct]}`;
-
-  let resultText = isCorrect
-    ? t(lang, 'quiz_correct', q.xp)
-    : t(lang, 'quiz_wrong');
-
+  let resultText = isCorrect ? t(lang, 'quiz_correct', q.xp) : t(lang, 'quiz_wrong');
   resultText += `\n\n${t(lang, 'quiz_explanation')} ${q.explanation}`;
-
-  if (!isCorrect) {
-    resultText += `\n\n✅ Правильный ответ: *${correctAnswer}*`;
-  }
+  if (!isCorrect) resultText += `\n\n✅ Правильный ответ: *${correctAnswer}*`;
 
   const opts = q.options.map((opt, i) => {
     if (i === q.correct) return `✅ ${letters[i]}) ${opt}`;
@@ -1293,22 +1263,12 @@ bot.action(/^quiz:answer:(\d+):(\d+)$/, async (ctx) => {
     return `${letters[i]}) ${opt}`;
   }).join('\n');
 
-  const updatedText = [
-    `📌 ${q.category} | Вопрос #${q.id}`,
-    '',
-    q.question,
-    '',
-    opts,
-    '',
-    resultText,
-  ].join('\n');
+  const updatedText = [`📌 ${q.category} | Вопрос #${q.id}`, '', q.question, '', opts, '', resultText].join('\n');
 
   try {
     await ctx.editMessageText(updatedText, {
       parse_mode: 'Markdown',
-      ...Markup.inlineKeyboard([[
-        Markup.button.callback(t(lang, 'quiz_next') + ` ➡️`, 'quiz:next'),
-      ]]),
+      ...Markup.inlineKeyboard([[Markup.button.callback(t(lang, 'quiz_next') + ` ➡️`, 'quiz:next')]]),
     });
   } catch (e) {
     await ctx.reply(updatedText, {
@@ -1355,7 +1315,7 @@ bot.action('refresh_profile', async (ctx) => {
 });
 
 // ─────────────────────────────────────────────
-//  LESSON ACTIONS (legacy support)
+//  LESSON ACTIONS (legacy)
 // ─────────────────────────────────────────────
 bot.action(/^lesson:read:(.+)$/, async (ctx) => {
   const lessonId = ctx.match[1];
@@ -1446,8 +1406,6 @@ bot.command('broadcast', async (ctx) => {
   await ctx.reply(`✅ Отправлено: ${sent}\n❌ Ошибок: ${failed}`);
 });
 
-// Admin: add PDF to a course by file_id
-// Usage: /addcoursepdf hcs AgACAgIAA...
 bot.command('addcoursepdf', async (ctx) => {
   if (!isAdmin(ctx)) return;
   const parts = ctx.message.text.split(' ');
@@ -1467,7 +1425,6 @@ bot.command('addcoursepdf', async (ctx) => {
   await ctx.reply(`✅ PDF добавлен к курсу "${course.ru_title}"\nFile ID: ${fileId}\nВсего PDF в курсе: ${course.pdf.length}`);
 });
 
-// Admin: list course IDs
 bot.command('courses', async (ctx) => {
   if (!isAdmin(ctx)) return;
   const list = COURSES.map(c => `• ${c.id}\n  RU: ${c.ru_title}\n  UZ: ${c.uz_title}\n  💰 ${c.price} XP\n  PDF: ${c.pdf.length} файл(ов)`).join('\n\n');
@@ -1605,6 +1562,7 @@ async function main() {
     console.log(`📢 Channel: ${CHANNEL_LINK}`);
     console.log(`🧠 Quiz questions loaded: ${QUIZ_QUESTIONS.length}`);
     console.log(`📚 Courses loaded: ${COURSES.length}`);
+    console.log(`🔄 Self-ping every 7 minutes: ${RENDER_URL || 'RENDER_EXTERNAL_URL not set'}`);
   } catch (err) {
     console.error('❌ Failed to start:', err.message);
     process.exit(1);
